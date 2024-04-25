@@ -36,7 +36,7 @@ const createOrdersTable = (databaseName,databaseHost,databasePassword,databaseUs
         let sql = `CREATE TABLE IF NOT EXISTS Orders ( ordersID INT AUTO_INCREMENT PRIMARY KEY ,carNumber INT NOT NULL, 
                 carText VARCHAR(255) NOT NULL, ownerName VARCHAR(255) NOT NULL, licenseImage VARCHAR(255) NOT NULL, 
                 carType VARCHAR(255) NOT NULL, STATUS INT, arriveTime DATETIME NOT NULL, leaveTime DATETIME NOT NULL, 
-                expired INT NOT NULL, conter INT NOT NULL, employeesID int, 
+                expired INT NOT NULL, conter INT NOT NULL, employeesID int, email VARCHAR(255) NOT NULL,
                 reason VARCHAR(255) NOT NULL, FOREIGN KEY (employeesID) REFERENCES Employess(employeesID)
                 ,CONSTRAINT carLicence UNIQUE (carText,carNumber))`
         con.query(sql,(err,results)=>{

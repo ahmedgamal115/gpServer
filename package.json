@@ -17,6 +17,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "firebase": "^10.11.0",
     "firebase-admin": "^12.1.0",
     "graphql": "^16.8.1",
     "graphql-iso-date": "^3.6.1",
@@ -25,8 +26,10 @@
     "mysql": "^2.18.1",
     "mysql2": "^3.9.4",
     "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.13",
     "nodemon": "^3.1.0",
     "save": "^2.9.0",
-    "sequelize": "^6.37.3"
+    "sequelize": "^6.37.3",
+    "multer": "^1.4.5-lts.1"
   }
 }

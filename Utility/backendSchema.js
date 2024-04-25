@@ -29,6 +29,7 @@ module.exports = gql`
         carText: String!
         ownerName: String!
         licenseImage: String!
+        email: String!
         carType: String!
         STATUS: Int
         arriveTime: DateTime!
@@ -51,11 +52,12 @@ module.exports = gql`
             licenseImage: Upload!,
             carType: String!,
             arriveTime: String!,
+            email:String!,
             leaveTime: String!,
             reason: String!): Orders!
 
         changeOrderStatus( ordersID: ID!, STATUS: Int! ) : Orders!
         entiryCar( carNumber: Float!,
-            carText: String! ) : Orders!
+            carText: String! ) : Boolean!
     }
 `

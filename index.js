@@ -10,6 +10,7 @@ const cron = require('node-cron')
 var mysql = require('mysql')
 require('dotenv').config()
 // const models = require('./Models')
+const path = require('path')
 
 
 const app = express()
@@ -17,6 +18,7 @@ const port = process.env.port || 4000
 
 app.use(graphqlUploadExpress());
 app.use(cors())
+app.use("/Licence", express.static("Licence"));
 
 const getUser = (tokken)=>{
     if(tokken){

@@ -4,6 +4,12 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { AuthenticationError } = require('apollo-server-express');
 const bucket = require("../Utility/fireBaseConfig")
+const nodemailer = require('nodemailer');
+const { getStorage, ref, uploadBytes, getDownloadURL } = require('firebase/storage');
+const { initializeApp } = require('firebase/app');
+const path = require('path');
+const {acceptForm,refuseForm} = require('../Utility/templete')
+
 
 
 const pool = mysql.createPool({
@@ -14,23 +20,54 @@ const pool = mysql.createPool({
     database: process.env.DATABASE_NAME
 });
 
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // use SSL
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASSWORD,
+    },
+});
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDtyMKju6XleXRrAVBdosR_dNL98XMniFo",
+    authDomain: "testapp-10425.firebaseapp.com",
+    projectId: "testapp-10425",
+    storageBucket: "testapp-10425.appspot.com",
+    messagingSenderId: "512324825092",
+    appId: "1:512324825092:web:67749b95f4300bce01c551"
+};
+initializeApp(firebaseConfig)
+
+
 const addnewImage = async(image)=>{
     const { createReadStream, filename, encoding, mimetype } = await image
     const stream = createReadStream();
-    const fileUpload = bucket.file(`License/${filename}`);
-    const uploadStream = fileUpload.createWriteStream({
-        metadata: {
-            contentType: mimetype
-        }
-    });
-    await stream.pipe(uploadStream)
-    let imageUrl = (await fileUpload.getSignedUrl({
-        action: 'read',
-        expires: '01-01-2025', // Adjust the expiration time as needed
-    }))
-    return imageUrl[0]
+    let imagePath = "Licence/" + `${filename.split(".")[0]}_${new Date().getHours()}_${new Date().getMinutes()}${path.extname(filename)}`
+    const out = require('fs').createWriteStream(imagePath);
+    stream.pipe(out);
+    return imagePath
 }
 
+const sendMailRequste = async(email,username,status)=>{
+    await transporter.sendMail({
+        from: '"auctionlive0@gmail.com', // sender address
+        to: email, // list of receivers
+        subject: "Respond to the request to parking", // Subject line
+        text: `Hello ${username}`, // plain text body
+        html: `<b>${status === 0 ? refuseForm
+        : acceptForm}</b>`, // html body
+    },(err,info)=>{
+        if(err){
+            console.log(err)
+        }else{
+            console.log("Email Sended"+ info.response)
+        }     
+    });
+
+}
 
 module.exports = {
     signUp: async(parent, args)=>{
@@ -113,6 +150,7 @@ module.exports = {
             carText: args.carText,
             ownerName: args.ownerName,
             licenseImage: args.licenseImage,
+            email: args.email,
             carType: args.carType,
             arriveTime: args.arriveTime,
             leaveTime: args.leaveTime,
@@ -125,6 +163,7 @@ module.exports = {
                     carText,
                     ownerName,
                     licenseImage,
+                    email,
                     carType,
                     arriveTime,
                     leaveTime,
@@ -135,6 +174,7 @@ module.exports = {
                     '${order.carText}',
                     '${order.ownerName}',
                     '${image}',
+                    '${order.email}',
                     '${order.carType}',
                     '${order.arriveTime}',
                     '${order.leaveTime}',
@@ -163,6 +203,7 @@ module.exports = {
                                 if(err){
                                     throw err
                                 }else{
+                                    sendMailRequste(results[0].email, results[0].ownerName, results[0].STATUS)
                                     resolve(results[0])
                                 }
                             })
@@ -173,6 +214,7 @@ module.exports = {
         }
     },
     entiryCar: async(parent,args,user)=>{
+        console.log(args)
         let currentDate = new Date().toISOString()
         return new Promise((resolve,reject)=>{
             pool.query(`SELECT
@@ -197,10 +239,12 @@ module.exports = {
                                 throw err
                             }else{
                                 if(results.changedRows !== 0){
-                                    resolve(order)
+                                    resolve(true)
                                 }
                             }
                         })
+                    }else{
+                        resolve(false)
                     }
                 }
             })
