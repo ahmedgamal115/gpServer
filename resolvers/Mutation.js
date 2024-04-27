@@ -3,7 +3,6 @@ require('dotenv').config()
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { AuthenticationError } = require('apollo-server-express');
-const bucket = require("../Utility/fireBaseConfig")
 const nodemailer = require('nodemailer');
 const { getStorage, ref, uploadBytes, getDownloadURL } = require('firebase/storage');
 const { initializeApp } = require('firebase/app');
@@ -53,7 +52,7 @@ const addnewImage = async(image)=>{
 
 const sendMailRequste = async(email,username,status)=>{
     await transporter.sendMail({
-        from: '"auctionlive0@gmail.com', // sender address
+        from: process.env.GMAIL_USER, // sender address
         to: email, // list of receivers
         subject: "Respond to the request to parking", // Subject line
         text: `Hello ${username}`, // plain text body
